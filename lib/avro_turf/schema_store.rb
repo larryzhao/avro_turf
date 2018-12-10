@@ -20,6 +20,8 @@ class AvroTurf::SchemaStore
       if schema.fields.nil?
         # log error schema
         @logger.error("fields-nil-err | #{fullname}")
+      else
+        @logger.info("schema-ok | #{fullname} | #{schema_json}")
       end
 
       return @schemas[fullname]
@@ -32,6 +34,8 @@ class AvroTurf::SchemaStore
 
     if schema.fields.nil?
       @logger.error("fields-nil-err | #{fullname} | #{schema_json}")
+    else
+      @logger.info("parse-schema | #{fullname} | #{schema_json}")
     end
 
     if schema.respond_to?(:fullname) && schema.fullname != fullname
