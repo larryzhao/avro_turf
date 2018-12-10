@@ -20,10 +20,10 @@ class AvroTurf
   # codec        - The String name of a codec that should be used to compress messages (optional).
   #
   # Currently, the only valid codec name is `deflate`.
-  def initialize(schemas_path: nil, schema_store: nil, namespace: nil, codec: nil)
+  def initialize(schemas_path: nil, schema_store: nil, namespace: nil, codec: nil, logger: nil)
     @namespace = namespace
-    @schema_store = schema_store || 
-      SchemaStore.new(path: schemas_path || DEFAULT_SCHEMAS_PATH)
+    @schema_store = schema_store ||
+      SchemaStore.new(path: schemas_path || DEFAULT_SCHEMAS_PATH, logger: logger)
     @codec = codec
   end
 

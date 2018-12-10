@@ -1,8 +1,9 @@
 class AvroTurf::SchemaStore
 
-  def initialize(path: nil)
+  def initialize(path: nil, logger: nil)
     @path = path or raise "Please specify a schema path"
     @schemas = Hash.new
+    @logger  = logger or raise "Please give me a logger"
   end
 
   # Resolves and returns a schema.
@@ -13,12 +14,25 @@ class AvroTurf::SchemaStore
   def find(name, namespace = nil)
     fullname = Avro::Name.make_fullname(name, namespace)
 
-    return @schemas[fullname] if @schemas.key?(fullname)
+    if @schemas.key?(fullname)
+      schema = @schemas[fullname]
+
+      if schema.fields.nil?
+        # log error schema
+        @logger.error("fields-nil-err | #{fullname}")
+      end
+
+      return @schemas[fullname]
+    end
 
     *namespace, schema_name = fullname.split(".")
     schema_path = File.join(@path, *namespace, schema_name + ".avsc")
     schema_json = JSON.parse(File.read(schema_path))
     schema = Avro::Schema.real_parse(schema_json, @schemas)
+
+    if schema.fields.nil?
+      @logger.error("fields-nil-err | #{fullname} | #{schema_json}")
+    end
 
     if schema.respond_to?(:fullname) && schema.fullname != fullname
       raise AvroTurf::SchemaError, "expected schema `#{schema_path}' to define type `#{fullname}'"
